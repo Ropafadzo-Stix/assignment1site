@@ -1,0 +1,13 @@
+---
+title: "Abstract"
+---
+
+This report explores South African presidential State of the Nation Address (SONA) speeches. The aim is to construct predictive models that identify individual presidents by analyzing sentences from their SONA speeches. Text mining techniques are employed to analyse the semi-unstructured data.
+  
+Six models were constructed using three predictive modeling techniques: feedforwards neural network, convolutional neural network and classification tree, and two data structuring techniques were used: top words bag-of-words and converting text-to-sequence. The data was split into 70% training and 30% testing for all models. However, two of the neural network models constructed used 20% of the training data for cross-validation. The neural network models evaluated the text-to-sequence data, while the classification tree models evaluated the bag-of-words data.
+
+Results:
+Neural network models showed overfitting issues, while classification models, particularly the top 500 bag-of-words classification tree, demonstrated better consistency between training and testing data. Kappa statistics indicated a weak agreement between predicted and actual classifications.
+
+Conclusion:
+The top-performing model was a classification tree using the top 500 bag-of-words. To improve model performance, a larger and balanced sample of presidential speeches is needed.

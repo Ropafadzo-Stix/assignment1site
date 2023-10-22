@@ -1,0 +1,19 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Assignment 1"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: CHMROP002.html
+        text: Report
+      
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true

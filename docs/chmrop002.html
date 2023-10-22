@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ropafadzo Chimuti">
+<meta name="keywords" content="SONA, neural networks ,classification trees, convolutional neural networks ,bag-of-words,nn,cnn">
+
+<title>Assignment 1 - Model Selection in Text Classification: A Study on Predictive Approaches for President Identification</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Assignment 1</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html" rel="" target="">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./CHMROP002.html" rel="" target="">
+ <span class="menu-text">Report</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#literature-review" id="toc-literature-review" class="nav-link" data-scroll-target="#literature-review">literature Review</a></li>
+  <li><a href="#data-and-methods" id="toc-data-and-methods" class="nav-link" data-scroll-target="#data-and-methods">Data and Methods</a>
+  <ul class="collapse">
+  <li><a href="#data-preprocessing" id="toc-data-preprocessing" class="nav-link" data-scroll-target="#data-preprocessing">Data Preprocessing</a></li>
+  <li><a href="#text-to-sequence" id="toc-text-to-sequence" class="nav-link" data-scroll-target="#text-to-sequence">Text to Sequence</a></li>
+  <li><a href="#bag-of-words" id="toc-bag-of-words" class="nav-link" data-scroll-target="#bag-of-words">Bag of words</a></li>
+  <li><a href="#testing-and-training" id="toc-testing-and-training" class="nav-link" data-scroll-target="#testing-and-training">Testing and Training</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  <li><a href="#feedforward-neural-networks-fnn" id="toc-feedforward-neural-networks-fnn" class="nav-link" data-scroll-target="#feedforward-neural-networks-fnn">Feedforward Neural Networks (FNN)</a></li>
+  <li><a href="#convolutional-neural-networks-cnn" id="toc-convolutional-neural-networks-cnn" class="nav-link" data-scroll-target="#convolutional-neural-networks-cnn">Convolutional Neural Networks (CNN)</a></li>
+  <li><a href="#classification-trees" id="toc-classification-trees" class="nav-link" data-scroll-target="#classification-trees">Classification Trees</a></li>
+  </ul></li>
+  <li><a href="#results-and-discussion" id="toc-results-and-discussion" class="nav-link" data-scroll-target="#results-and-discussion">Results and Discussion</a>
+  <ul class="collapse">
+  <li><a href="#evaluating-performance-of-the-model-with-the-best-accuracy-results" id="toc-evaluating-performance-of-the-model-with-the-best-accuracy-results" class="nav-link" data-scroll-target="#evaluating-performance-of-the-model-with-the-best-accuracy-results">Evaluating performance of the model with the best accuracy results</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Model Selection in Text Classification: A Study on Predictive Approaches for President Identification</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ropafadzo Chimuti </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="abstract-title">Abstract</div>
+    <p>This report explores South African presidential State of the Nation Address (SONA) speeches. The aim is to construct predictive models that identify individual presidents by analyzing sentences from their SONA speeches. Text mining techniques are employed to analyse the semi-unstructured data.</p>
+    <p>Six models were constructed using three predictive models: feedforwards neural network, convolutional neural network and classification tree, and two data structuring techniques were used: top words bag-of-words and converting text-to-sequence. The data was split into 70% training and 30% testing for all models. However, two of the neural networks constructed used 20% of the training data for cross-validation. The neural network models evaluated the text-to-sequence data, while the classification tree models evaluated the bag-of-words data.</p>
+    <p>Results: Neural network models showed overfitting issues, while classification models, particularly the top 500 bag-of-words classification tree, demonstrated better consistency between training and testing data. Kappa statistics indicated a weak agreement between predicted and actual classifications.</p>
+    <p>Conclusion: The top-performing model is a classification tree using the top 500 bag-of-words. To improve model performance, a larger and balanced sample of presidential speeches is needed.</p>
+  </div>
+</div>
+
+</header>
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>This report investigates speeches made by South African presidents at the State of the Nation Address (SONA). In these speeches the presidents address the nation on the prevailing situation, the SONA serves as an account of the country’s progress, challenges, and policy directions. The analysis of these speeches over time can offer insights into the evolving political landscape, priorities of each presidency, and the utilization of language by different leaders.</p>
+<p>This report aims to construct predictive models which can discern the distinctions between different presidents. These models will be designed to take a sentence from the SONA speeches as input and predict which President delivered it.</p>
+</section>
+<section id="literature-review" class="level2">
+<h2 class="anchored" data-anchor-id="literature-review">literature Review</h2>
+<p>Text mining techniques were employed to achieve the research objectives. These techniques enable the analysis of unstructured textual data collections.</p>
+<p>Neural Network: A neural network contains connected neurons with associated weights. It processes data chronologically and learns by comparing its classifications to the actual target variable [<a href="#1">1</a>]. Neural networks possess robustness, self-learning capabilities, and adaptiveness, this makes them advanced classifiers [<a href="#1">1</a>]. They consist of three essential layers: the input layer, the hidden/intermediate layer, and the output layer.</p>
+<p>The neural network models in this study utilized specific activation functions:</p>
+<p>Softmax Activation Function: This function is crucial in the output layer of neural networks, especially for multi-class classification. It converts output scores into class probabilities, ensuring that the probabilities sum to one.</p>
+<p>Rectified Linear Unit (ReLU) Activation Function: ReLU replaces negative values with zero while retaining positive values. It is widely used in hidden layers of neural networks to expedite convergence during training and mitigate the vanishing gradient problem.</p>
+<p>Classification Tree: Classification trees, also referred to as decision trees, are a data mining classification technique. They employ a branching method to represent decision outcomes [<a href="#2">2</a>]. Decision trees learn from data to approximate decision-making processes through a set of IF-THEN rules [<a href="#2">2</a>]. These trees are valuable for decision-making and have the ability to depict various possible outcomes [<a href="#2">2</a>].</p>
+</section>
+<section id="data-and-methods" class="level2">
+<h2 class="anchored" data-anchor-id="data-and-methods">Data and Methods</h2>
+<section id="data-preprocessing" class="level3">
+<h3 class="anchored" data-anchor-id="data-preprocessing">Data Preprocessing</h3>
+<p>President speeches in text format form 1994-2023 were downloaded from the sona website and read into a data frame for preprocessing. The speeches were semi-structured but were of different sizes so tabulation could not be automated. Information like the name of the president who delivered the speech, the date and the year the speech was delivered were manual extracted from each speech for tabulation. The table below shows the number of speeches per president in the data set.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  deKlerk   Mandela     Mbeki Motlanthe Ramaphosa      Zuma 
+        1         7        10         1         7        10 </code></pre>
+</div>
+</div>
+<p>It is evident from the table presented that the dataset is not balances. Over sampling or under sampling the dataset was contemplated, but because of the significant difference in sample sizes, removing the two underrepresented president speeches was opted for instead to avoid introducing biases to the data.</p>
+<p>The way dates were formatted was adjusted to ensure consistency and unnecessary text like dollar signs and asterikes were also removed from the data to be analysed. Once the data was successfully tabulated in a satisfactory format, the speeches were tokenised into sentences and words for the analysis stage. The table below shows the number of sentences per president in the dataset.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  Mandela     Mbeki Ramaphosa      Zuma 
+     1583      2248      2135      2365 </code></pre>
+</div>
+</div>
+</section>
+<section id="text-to-sequence" class="level3">
+<h3 class="anchored" data-anchor-id="text-to-sequence">Text to Sequence</h3>
+<p>Neural networks were one of the methods implemented in this investigation to make the predictions. This method requires numeric inputs, so the data had to be transformed into numeric form. To do this, the dataset containing the sentences by each president were converted to sequence, with a maximum length of 70 and 1500 maximum features. Sentences of lengths less than 70 were padded with zeros to satisfy the length requirement.</p>
+<p>The target variable was converted to a numeric categorical variable.The result of this transformation was target matrix of zeros and ones with four columns,each representing the respective presidents in the dataset.</p>
+</section>
+<section id="bag-of-words" class="level3">
+<h3 class="anchored" data-anchor-id="bag-of-words">Bag of words</h3>
+<p>In this investigation, different data structuring techniques were employed to prepare the input data. A technique where a fixed number of the most frequently occurring words were selected from the dataset and assembled into a collection was used in this case. This collection of words are known as a “bag of words”. The bag-of-words method is limited in that it loses important textual details, such as word arrangement, sentence organization, and contextual information. These are the very elements that humans rely on to comprehend and make sense of text.</p>
+<p>This input data was used to fit the classification tree models.</p>
+</section>
+<section id="testing-and-training" class="level3">
+<h3 class="anchored" data-anchor-id="testing-and-training">Testing and Training</h3>
+<p>Each input set was split into two datasets, one set to train the models and the other to test it. The training datasets contained 70% of the data and the testing sets contained the remaining 30%. The data was split in a balanced way to ensure that 70% of the data from each president was represented in the training set and the remaining 30% in the testing set.</p>
+</section>
+<section id="methods" class="level3">
+<h3 class="anchored" data-anchor-id="methods">Methods</h3>
+<p>This analysis was conducted using R software,three different types of models were constructed to assess the pre-processed input data. Keras library functions were used to develop the neural network models presented in this study and Rpart library functions were used to fit the classification trees.</p>
+</section>
+<section id="feedforward-neural-networks-fnn" class="level3">
+<h3 class="anchored" data-anchor-id="feedforward-neural-networks-fnn">Feedforward Neural Networks (FNN)</h3>
+<p>Feedforward neural network models were built to evaluate the text to sequence data. The models were designed for a multi-class classification with 4 units in the final dense layer. The dense layer used the softmax activation function to output a probability distribution over the classes. The model had an embedding layer as the input layer, this layer converts input sequences into a continuous vector space representation. The input layer was followed by a regularization layer with a dropout rate of 0.2, which means 20% of the neurons in the previous layer were randomly set to zero during each training epoch to helps mitigate overfitting. The dropout layer was followed by a hidden dense layer with 100 units and utilized ReLU activation. The model was trained with categorical cross-entropy loss and monitored with early stopping to optimize training.The adam optimiser with the learning rate set to 0.01 was used.</p>
+<p>Two feedforward models with the same architecture were built to access the effect of cross validation and early stopping on accuracy. One model implemented cross validation and early stopping while the other did not.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-a" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="chmrop002_files/figure-html/fig-a-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;1: FNN accuracy and loss of the training data set</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-a">Figure&nbsp;1</a> shows a graph of the model training results when cross-validation and early stopping were not implemented.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-b" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="chmrop002_files/figure-html/fig-b-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;2: FNN accuracy and loss of the training and validation data sets with early stopping implemented</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-b">Figure&nbsp;2</a> shows a graph of the model training results when cross-validation and early stopping were implemented.</p>
+<p>Early stopping can only be implemented when there is cross-validation, in this case 20% of the training data was set aside for cross-validation at each epoch. The model was designed to stop training if the recorded validation loss continuously increased without improvement for 10 epochs. This was done to prevent overfitting to the training data and to select the optimal model that performs well on unseen data.</p>
+</section>
+<section id="convolutional-neural-networks-cnn" class="level3">
+<h3 class="anchored" data-anchor-id="convolutional-neural-networks-cnn">Convolutional Neural Networks (CNN)</h3>
+<p>The convolutional neural network (cnn) models were designed to be very similar to the feedforward neural network models. The CNN models had a more complex architecture, involving one dimensional convolutional and max-pooling layers. The convolutional layer had 64 filters, a kernel size of 8, and it utilised the ReLU activation function. This layer is particularly effective for identifying specific patterns in text data. The max-pooling layer had a maximum pool size of 2. This layer is responsible for dimension reduction of the data, this makes the layers in the model more computationally efficient.</p>
+<p>Like the previous section two CNN models were developed, one model implemented cross validation and early stopping while the other did not.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-c" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="chmrop002_files/figure-html/fig-c-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;3: CNN accuracy and loss of the training data set</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-c">Figure&nbsp;3</a> shows a graph of the model training results when cross-validation and early stopping were not implemented.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-d" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="chmrop002_files/figure-html/fig-d-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;4: CNN accuracy and loss of the training and validation data sets with early stopping implemented</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-d">Figure&nbsp;4</a> shows a graph of the model training results when cross-validation and early stopping were implemented. 20% of the training data was set aside for validation at each epoch.</p>
+</section>
+<section id="classification-trees" class="level3">
+<h3 class="anchored" data-anchor-id="classification-trees">Classification Trees</h3>
+<p>Two classification trees were fitted to the bag-of-words datasets. One bag-of-words dataset selected the top 100 words from the speeches while the other selected the top 500 words.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-e" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="chmrop002_files/figure-html/fig-e-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;5: Classification trees for the top100 and top500 bag-of-words</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-e">Figure&nbsp;5</a> displays the classification trees generated using the bag-of-words input datasets. Notably, both resulting trees are classifying the input into just two categories, even though the task involves classifying into four distinct classes.</p>
+</section>
+</section>
+<section id="results-and-discussion" class="level2">
+<h2 class="anchored" data-anchor-id="results-and-discussion">Results and Discussion</h2>
+<p>Below is a table which shows the model accuracy results for the six models which were constructed.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Model accuracy results</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Training Acc</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Validation Acc</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Testing Acc</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">kappa</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">P-Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">FNN</td>
+<td style="text-align: left;">0.9</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">0.277</td>
+<td style="text-align: left;">0.058</td>
+<td style="text-align: left;">0.944</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">FNN.CV</td>
+<td style="text-align: left;">0.856</td>
+<td style="text-align: left;">0.488</td>
+<td style="text-align: left;">0.295</td>
+<td style="text-align: left;">0.058</td>
+<td style="text-align: left;">0.944</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CNN</td>
+<td style="text-align: left;">0.613</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">0.304</td>
+<td style="text-align: left;">0.058</td>
+<td style="text-align: left;">0.944</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CNN.CV</td>
+<td style="text-align: left;">0.578</td>
+<td style="text-align: left;">0.464</td>
+<td style="text-align: left;">0.277</td>
+<td style="text-align: left;">0.058</td>
+<td style="text-align: left;">0.944</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Top100 CT</td>
+<td style="text-align: left;">0.591</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">0.455</td>
+<td style="text-align: left;">0.25</td>
+<td style="text-align: left;">0.154</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Top500 CT</td>
+<td style="text-align: left;">0.636</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">0.545</td>
+<td style="text-align: left;">0.375</td>
+<td style="text-align: left;">0.051</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>The feedforward neural network models (FNN) performed best on the training data but poorly on unseen data. The same trend is apparent with the convolutional neural network models (CNN). This trend implies that the models are over fitting the training data. The difference between the results of models which applied early stopping and cross validation (FNN.CV|CNN.CV) and those which did not (FNN|CNN), are not suggestively different. Which means that applying early stopping and cross validation did not improve the results of these models.</p>
+<p>The classification models (Top100 CT|Top500 CT) performed better than the neural network models. Though the accuracies of these models were also not satisfactory, there was great consistence between how the models performed with seen and unseen data. The classification tree built from the top 500 bag of words produced the best accuracy on unseen data.</p>
+<p>Kappa, also known as K , is a statistic that is used to evaluate the agreement between predicted classifications and actual classifications. The kappa statistic ranges from -1 to 1:</p>
+<ul>
+<li><p>A K value of 1 indicates perfect agreement beyond chance.</p></li>
+<li><p>A K value of 0 indicates agreement that is exactly what would be expected by chance.</p></li>
+<li><p>A K value less than 0 suggests less agreement than would be expected by chance, indicating that the models are disagreeing more than they would if their choices were random.</p></li>
+</ul>
+<p>Kappa is particularly useful when assessing the performance of a classification model, especially in situations where class distributions are imbalanced, like in this case.</p>
+<p>The K values for all the classification models indicate that there is a weak agreement between the predicted classifications and the actual classifications. The Top500 bag-of-words classification tree models remains the best model as it shows a higher agreement between the predicted and the actual beyond chance.</p>
+<p>The P-value is used to determine the significance of a statistical result. A p-value of less than or equal to the chosen significance level suggests that the observation results are statistically significant. In this case the chosen significance level was 0.05, which means that all the results obtained were statistically significant. The Top500 bag-of-words classification model had a p-value on 0.051, 0.001 units above the cutoff limit. So, with some improvements such as increasing the sample size, the model has potential to produce statistically significant results</p>
+<section id="evaluating-performance-of-the-model-with-the-best-accuracy-results" class="level3">
+<h3 class="anchored" data-anchor-id="evaluating-performance-of-the-model-with-the-best-accuracy-results">Evaluating performance of the model with the best accuracy results</h3>
+<p>Below is a confusion matrix which shows how the top 500 bag-of-words classification tree model performed on the test dataset.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Top500 Classification tree test model confusion matrix</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Mandela</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Mbeki</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Ramaphosa</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Zuma</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Mandela</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Mbeki</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Ramaphosa</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Zuma</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>The model perfectly classifies the content delivered by President Mbeki and President Zuma. <a href="#fig-e">Figure&nbsp;5</a> shows that the classification tree which was built only classifies into two classes which are related to these presidents. It is also noteworthy that these presidents have more speeches than President Mandela and President Ramaphosa. Which implies that sample size may be the reason why the model failed to successfully build and classify into the 4 expected classes.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>The best predictive model to use on this data is a classification tree which takes the top 500 bag-of -words from the speeches as input. A bigger and balanced sample of the president speeches is required for the model to perform well.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p><a name="1"> [1]</a> Prasanna, P.L. and Rao, D.R., 2018. Text classification using artificial neural networks. International Journal of Engineering &amp; Technology, 7(1.1), pp.603-606.</p>
+<p><a name="2"> [2]</a> Noormanshah, W.M., Nohuddin, P.N. and Zainol, Z., 2018. Document categorization using decision tree: Preliminary study. International journal of engineering &amp; technology, 7(4.34), pp.437-440.</p>
+<p><a name="2"> [3]</a> OpenAI. (Year). “GPT-3.5 Architecture.” Available at: https://www.openai.com/gpt-3/ (Accessed: October , 2023).</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
